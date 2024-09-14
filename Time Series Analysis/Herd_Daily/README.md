@@ -10,4 +10,4 @@ The data used in this example consists of daily records of milk production. The 
 
 A new Prophet model is instantiated and then fitted with the training data. This training data comprises 80% of the total dataset, allowing the remaining 20% to be used for model validation.
 
-Useful article like: https://towardsdatascience.com/getting-started-predicting-time-series-data-with-facebook-prophet-c74ad3040525
+Useful article link: https://towardsdatascience.com/getting-started-predicting-time-series-data-with-facebook-prophet-c74ad3040525
