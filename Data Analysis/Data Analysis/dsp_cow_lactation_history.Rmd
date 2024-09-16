@@ -1,0 +1,157 @@
+---
+title: "dsp_Cow_Lactation_History"
+author: "XUHENG LI"
+date: "2024-08-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(dplyr)
+library(GGally)
+library(ggcorrplot)
+library(ggplot2)
+library(rpart)
+library(class)
+library(caret)
+
+```
+
+
+## read dara
+```{r}
+setwd("C:/Users/13593/Desktop/dsp")
+dataset <- read_excel("Cow_Lactation_History.xlsx")
+str(dataset)
+```
+
+## data preprocess
+```{r}
+# calculate NA value
+na_rate <- sapply(dataset, function(x) sum(is.na(x)) / length(x) * 100)
+na_rate_df <- data.frame(Variable = names(na_rate), NA_Percentage = na_rate)
+print(na_rate_df)
+```
+I found that NA_Percentage is very high. And I found that NA values mainly appeared after data with cow number 2250 and before data cow number 1001, so I deleted these rows
+
+```{r}
+dataset_sorted <- dataset %>%
+  arrange(`Cow Number`)
+dataset_filtered <- dataset_sorted %>%
+  filter(`Cow Number` >= 1001 & `Cow Number` <= 2219)
+
+head(dataset_filtered)
+
+na_rate1 <- sapply(dataset_filtered, function(x) sum(is.na(x)) / length(x) * 100)
+
+na_rate_df1 <- data.frame(Variable = names(na_rate1), NA_Percentage = na_rate1)
+
+print(na_rate_df1)
+```
+
+The NA percent is slightly better, but it's still a lot of NA, so I delete the variables that have too much NA percent, Then I fill the NA values of the remaining columns with the median of that column
+
+```{r}
+# select variables
+dataset_cleaned <- dataset_filtered %>%
+  select(-`Production`, -`Lactose Indication`, -`Lactose indication %`, -`Predicted Production (305 days)`)
+str(dataset_cleaned)
+
+# mutate median value
+replace_na_with_median <- function(x) {
+  if (is.numeric(x)) {
+    x[is.na(x)] <- median(x, na.rm = TRUE)
+  }
+  return(x)
+}
+
+
+dataset_filled <- dataset_cleaned %>%
+  mutate(across(everything(), replace_na_with_median))
+
+str(dataset_filled)
+summary(dataset_filled)
+
+```
+
+## pre-analysis
+
+```{r}
+# Observe the overall distribution of the data
+par(mfrow = c(2,5))
+boxplot(dataset_filled$`Lac Days`, main = "Lac Days")
+boxplot(dataset_filled$`Lactation No`, main = "Lactation No")
+boxplot(dataset_filled$`Total Amount Feed`, main = "Total Amount Feed")
+boxplot(dataset_filled$`Day Production Avg`, main = "Day Production Avg")
+boxplot(dataset_filled$`Milk - Fat kg`, main = "Milk - Fat kg")
+boxplot(dataset_filled$`Milk - Protein kg`, main = "Milk - Protein kg")
+boxplot(dataset_filled$`Avg Number Of Milkings`, main = "Avg Number Of Milkings")
+boxplot(dataset_filled$`Average Milk Speed`, main = "Average Milk Speed")
+boxplot(dataset_filled$`Fat indication %`, main = "Fat indication %")
+boxplot(dataset_filled$`Protein indication`, main = "Protein indication")
+
+# View data distribution and correlation
+ggpairs(dataset_filled[, c(4:13)])
+
+# Whether it is relevant and whether it is significant
+corr = cor(dataset_filled[, c(4:13)])
+p.mat <- cor_pmat(dataset_filled[, c(4:13)], use = "complete", method = "pearson")
+ggcorrplot(corr, hc.order = TRUE, type = "lower", lab = TRUE, p.mat = p.mat, 
+    insig = "blank")
+
+
+p1 <- ggplot(dataset_filled, aes(x = Reproduction)) + geom_bar(fill = "#CF6A1A", colour = "black") + 
+    theme_bw()
+p1
+
+
+
+
+```
+For Day Production Avg, Total Amount Feed (0.7) : This is the variable with the highest correlation with Day Production Avg, indicating that the Total Amount Feed has a significant impact on Day Production.
+
+Avg Number Of Milkings (0.48) : Also has some correlation with Day Production and can be considered as a feature.
+
+Milk-fat kg (0.53) and milk-protein kg (0.22) : Although these have a low direct correlation with daily Milk production, they can be used as characteristic variables for further analysis because they are output-related variables.
+
+Because of the high correlation between fat and protein, I chose only fat for the rest of the modeling
+
+## data analysis
+```{r}
+set.seed(123)  
+train_indices <- sample(seq_len(nrow(dataset_filled)), size = 0.7 * nrow(dataset_filled))
+train_data <- dataset_filled[train_indices, ]
+test_data <- dataset_filled[-train_indices, ]
+```
+
+
+```{r}
+# linear model
+linear_model <- lm(`Day Production Avg` ~ `Total Amount Feed` + `Avg Number Of Milkings` + `Milk - Fat kg`, data = train_data)
+summary(linear_model)
+```
+The model showed that Avg Number Of Milkings and Milk-Fat kg had a significant positive effect on daily Production Avg, while Total Amount Feed had a significant negative effect.
+The explanatory power of the model (R-squared) was moderate, indicating that the model explained about 52% of the variation in the response variables.
+The overall model is significant, and the residual error is small, indicating that the model is well fitted, but there is still room for improvement.
+
+```{r}
+predictions_lm <- predict(linear_model, newdata = test_data)
+
+mse_lm <- mean((predictions_lm - test_data$`Day Production Avg`)^2)
+print(mse_lm)
+```
+
+```{r}
+# decision tree
+decision_model <- rpart(`Day Production Avg` ~ `Total Amount Feed` + `Avg Number Of Milkings` + `Milk - Fat kg`, data = train_data)
+predictions_decision <- predict(decision_model, newdata = test_data)
+
+mse_predictions_decision <- mean((predictions_decision - test_data$`Day Production Avg`)^2)
+print(mse_predictions_decision)
+```
+As we can see, neither of these models is good.
+
+I think the data set is too small for correct data analysis and prediction.
+
+
