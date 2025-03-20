@@ -1,6 +1,7 @@
 # Big Data Analytics for Dairy Production Optimization
 
-**Master of Data Science Capstone Project**
+**Master of Data Science Capstone Project** 
+
 *University of Melbourne | October 2024*
 
 [![GitHub Repo](https://img.shields.io/badge/View%20on%20GitHub-Repository-blue?logo=github)](https://github.com/SX0818/DS_project) 
