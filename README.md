@@ -18,7 +18,9 @@ This project leverages big data analytics and machine learning to optimize milk 
 
 **Key Outcomes**:
 📈 95% accuracy in herd-level milk yield prediction (R²=0.95)
+
 🌾 12.7% potential feed cost reduction via optimized thresholds
+
 🔄 Identified 300s as optimal milking duration (diminishing returns beyond)
 
 ---
