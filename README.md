@@ -5,7 +5,6 @@
 
 [![GitHub Repo](https://img.shields.io/badge/View%20on%20GitHub-Repository-blue?logo=github)](https://github.com/SX0818/DS_project)
 
-
 ---
 
 ## Project Overview 🐄
@@ -42,7 +41,9 @@ I --> L[Farmer Dashboard]
 J --> L
 K --> L
 ```
+
 ---
+
 ## Key Features ✨
 
 1. Time Series Forecasting
@@ -58,18 +59,22 @@ K --> L
 - Cubic regression dual thresholds: **557.66 kg** and **1,793.31 kg**
 
 3. Machine Learning Models
-| Dataset       | Best Model          | MSE     | R²     | Key Features                          |
-|---------------|---------------------|---------|--------|---------------------------------------|
-| **Herd Daily** | Random Forest       | 0.89    | 0.95   | Feed, Lactation Days, Rumination      |
-| **Device Daily** | Gradient Boosting  | 5,207   | 0.91   | Milking Speed, Duration, Robot Metrics |
+
+| Dataset                | Best Model        | MSE   | R²  | Key Features                           |
+| ---------------------- | ----------------- | ----- | ---- | -------------------------------------- |
+| **Herd Daily**   | Random Forest     | 0.89  | 0.95 | Feed, Lactation Days, Rumination       |
+| **Device Daily** | Gradient Boosting | 5,207 | 0.91 | Milking Speed, Duration, Robot Metrics |
 
 4. Hyperparameter Optimization
+
 - GridSearchCV with **162 parameter combinations**
 - Tuned `n_estimators`, ` max_depth`, `learning_rate`
 - 3-fold cross-validation to evaluate model performance
+
 ---
 
 ## Repository Structure 📂
+
 To set up the repository structure, you can run the `setup_structure.sh` script using the following command:
 
 ```bash
@@ -77,11 +82,14 @@ bash setup_structure.sh
 ```
 
 ## Installation & Usage 💻
+
 ### Requirements
+
 - Python 3.8+
 - Jupyter Notebook
 
 ### Quick Start
+
 ```bash
 # Clone repository
 git clone https://github.com/SX0818/DS_project
@@ -93,14 +101,3 @@ pip install -r requirements.txt
 # Launch Jupyter Lab
 jupyter lab
 ```
-
-
-
-
-
-
-
-
-
-
-
